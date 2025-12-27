@@ -5,35 +5,42 @@ module tb_hdb3();
     reg sys_clk;
     reg rst_n;
 
-    wire data_orig;
+    wire [7:0] pcm_source_data;
+    wire hdb3_enc_in;
     wire hdb3_p;
     wire hdb3_n;
-    wire data_decoded;
+    wire hdb3_decoded_data;
+    wire [7:0] pcm_decoded_data;
+    wire pcm_decoded_valid;
 
-    // 实例化顶层模块（连接时钟、复位和信号）
+    // 实例化顶层模块
     hdb3_top u_hdb3_top (
                  .sys_clk(sys_clk),
                  .rst_n(rst_n),
-                 .data_orig(data_orig),
+                 .pcm_source_data(pcm_source_data),
+                 .hdb3_enc_in(hdb3_enc_in),
                  .hdb3_p(hdb3_p),
                  .hdb3_n(hdb3_n),
-                 .data_decoded(data_decoded)
+                 .hdb3_decoded_data(hdb3_decoded_data),
+                 .pcm_decoded_data(pcm_decoded_data),
+                 .pcm_decoded_valid(pcm_decoded_valid)
              );
 
-    // 产生 50MHz 时钟（每 10ns 翻转一次）
+    // 产生 50MHz 时钟
     initial begin
         sys_clk = 0;
         forever
-            #10 sys_clk = ~sys_clk; // 50MHz
+            #10 sys_clk = ~sys_clk;
     end
 
-    // 仿真复位：开始保持复位 100ns，然后释放
+    // 复位逻辑
     initial begin
         rst_n = 0;
         #100;
         rst_n = 1;
 
-        #10000;
+        // 运行足够长的时间以观察 PCM 数据变化
+        #20000;
         $stop;
     end
 
